@@ -14,9 +14,11 @@ default = ["cpp"]
 flamegraph = ["inferno"]
 protobuf = ["prost", "prost-derive", "prost-build"]
 cpp = ["symbolic-demangle/cpp"]
+llvm-unwind = ["backtrace/llvm-unwind" ]
+nongnu-unwind = ["backtrace/nongnu-unwind"]
 
 [dependencies]
-backtrace = "0.3"
+backtrace = { git = "https://github.com/schrodingerzhu/backtrace-rs" }
 lazy_static = "1.4"
 libc = "^0.2.66"
 log = "0.4"

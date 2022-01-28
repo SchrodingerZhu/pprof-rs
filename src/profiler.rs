@@ -247,7 +247,8 @@ extern "C" fn perf_signal_handler(
             let mut bt: SmallVec<[Frame; MAX_DEPTH]> = SmallVec::with_capacity(MAX_DEPTH);
             let mut index = 0;
 
-            unsafe {
+            #[cfg(not(any(feature = "llvm-unwind", feature = "nongnu-unwind")))]
+                unsafe {
                 backtrace::trace_unsynchronized(|frame| {
                     if index < MAX_DEPTH {
                         bt.push(frame.clone());
@@ -256,7 +257,20 @@ extern "C" fn perf_signal_handler(
                     } else {
                         false
                     }
-                });
+                })
+            }
+
+            #[cfg(any(feature = "llvm-unwind", feature = "nongnu-unwind"))]
+            unsafe {
+                backtrace::trace_unsynchronized_external_api(|frame| {
+                    if index < MAX_DEPTH {
+                        bt.push(frame.clone());
+                        index += 1;
+                        true
+                    } else {
+                        false
+                    }
+                }, true)
             }
 
             let current_thread = unsafe { libc::pthread_self() };
